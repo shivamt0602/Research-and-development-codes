@@ -6,34 +6,19 @@ from urllib.parse import urljoin
 # urls = ['https://infocosevi.co.cr/','https://www.google.com/','https://cocinaparati.club/products/dt517015-black?...']
 urls = ['https://infocosevi.co.cr/']
 
-def scrape_links(tag):
+def scrape_links(curr_url,src_link):
 
-  # print(tag)
-  #scrape the links 
-  html = str(tag)
-  # print(tag)
-  soup1 = BeautifulSoup(html, 'html.parser')
-  script_tag = soup1.find('script')
-  src_link = script_tag['src']
-  print(src_link) 
-  string_src_link = str(src_link) 
+  #these first three lines only applicable for certain js files
+  # string_src_link = str(src_link) 
+  # response = requests.get(src_link)
+  # js_content = response.text
+  if(curr_url in src_link):
 
-  if(string_src_link[0]!='/'):
+    print('yes,present')# so this works , process on it further
+    response = requests.get(src_link) 
+    js_content = response.text 
 
-    domain = re.findall(r"://([^/]+)/?", src_link)
-    #domain found to add to files
-
-    if domain:
-
-     domain = domain[0]
-     print(domain) 
-     r1 = requests.get(src_link) 
-     html_c = r1.content 
-     soup2 = BeautifulSoup(html_c, 'html.parser')
-     response = requests.get(src_link)
-     js_content = response.text
-
-     with open(f"{domain}.js",'w') as f_1:
+    with open('all_src_links.js','a') as f_1:
       f_1.write(js_content)
 
 
@@ -61,13 +46,26 @@ for url in urls:
                         script_content = script_tag.string
 
                         if script_content:
-
-                            f2.write(script_content + '\n') 
+                          # append the whole script thing to one single html script tag and then add a file name something.js
+                            f2.write(script_content + '\n')
 
                         else:
 
-                          scrape_links(script_tag)    
+                          tag = script_tag
 
+                          html = str(tag)
+                          # print(tag)
+                          soup1 = BeautifulSoup(html, 'html.parser')
+                          script_tag1 = soup1.find('script')
+                          src_link = script_tag1['src']
+                          print(src_link)
+                          # print(src_link)
+                          # string_src_link = str(src_link) 
+                          # response = requests.get(src_link)
+                          # js_content = response.text
+                          # print(js_content)
+
+                          scrape_links(url,src_link)#function call
 
             except (requests.RequestException, IOError) as e:
                 print(f"Failed to fetch content for {url}: {e}")
