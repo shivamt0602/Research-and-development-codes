@@ -1,42 +1,52 @@
+import os
 import requests
 from bs4 import BeautifulSoup
-import re
-from urllib.parse import urljoin
-import os
+from urllib.parse import urlparse, urljoin
 
-urls = ['https://infocosevi.co.cr/']
+def create_directory(url):
+    parsed_url = urlparse(url)
+    domain = parsed_url.netloc
+    directory = os.path.join(os.getcwd(), domain)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    return directory
 
-def scrape_links(curr_url, src_link):
+def scrape_links(curr_url, src_link, directory):
+
     if curr_url in src_link:
         print('Yes, present')  # It works, further processing
         response = requests.get(src_link)
         js_content = response.text
-
-        # Extract the filename from the src_link
         filename = src_link.split("/")[-1].replace(".js", "") + ".js"
-
-        with open(filename, 'w') as f:
+        filepath = os.path.join(directory, filename)
+        with open(filepath, 'w') as f:
             f.write(js_content)
 
-for url in urls:
-    try:
-        r = requests.get(url)
-        r.raise_for_status()  # Check for any HTTP request errors
+urls = ['https://infocosevi.co.cr/', 'https://www.google.com/']
 
+for landing_page_url in urls:
+    try:
+        r = requests.get(landing_page_url)
+        r.raise_for_status()
         html_content = r.content
         soup = BeautifulSoup(html_content, 'html.parser')
+        directory = create_directory(landing_page_url)
 
-        with open('landing_page.html', 'w', encoding='utf-8') as f:
+        if(soup):
+            landing_directory = create_directory(f'HTML_content')
+
+        os.path.join(directory,landing_directory)# directory in directory
+
+        with open(os.path.join(landing_directory, 'landing_page.html'), 'w', encoding='utf-8') as f:
             f.write(soup.prettify())
 
         script_tags = soup.find_all('script')
 
-        with open('script_tags_file.js', 'a', encoding='utf-8') as f2:
+        with open(os.path.join(directory, 'script_tags_file.js'), 'a', encoding='utf-8') as f:
             for script_tag in script_tags:
                 script_content = script_tag.string
-
                 if script_content:
-                    f2.write(script_content + '\n')
+                    f.write(script_content + '\n')
                 else:
                     tag = script_tag
                     html = str(tag)
@@ -44,9 +54,7 @@ for url in urls:
                     script_tag1 = soup1.find('script')
                     src_link = script_tag1['src']
                     print(src_link)
-
-                    scrape_links(url, src_link)  # Function call
+                    scrape_links(landing_page_url, src_link, directory)
 
     except (requests.RequestException, IOError) as e:
-        print(f"Failed to fetch content for {url}: {e}")
-        continue
+        print(f"Failed to fetch content for {landing_page_url}: {e}")
