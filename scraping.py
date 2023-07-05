@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 # urls = ['https://infocosevi.co.cr/','https://www.google.com/','https://cocinaparati.club/products/dt517015-black?...']
 urls = ['https://infocosevi.co.cr/']
 
-def scrape_links(curr_url,src_link):
+def scrape_scripts(curr_url,src_link):
 
   #these first three lines only applicable for certain js files
   # string_src_link = str(src_link) 
@@ -65,7 +65,7 @@ for url in urls:
                           # js_content = response.text
                           # print(js_content)
 
-                          scrape_links(url,src_link)#function call
+                          scrape_scripts(url,src_link)#function call
 
             except (requests.RequestException, IOError) as e:
                 print(f"Failed to fetch content for {url}: {e}")

@@ -5,21 +5,18 @@ from urllib.parse import urljoin
 import os
 
 urls = ['https://infocosevi.co.cr/']
-co = -1
 
 def scrape_links(curr_url, src_link):
-    
-    global co
-
     if curr_url in src_link:
         print('Yes, present')  # It works, further processing
         response = requests.get(src_link)
         js_content = response.text
-        co += 1
-        filename = f'{co}.js'
 
-        with open(filename, 'w') as f_1:
-            f_1.write(js_content)
+        # Extract the filename from the src_link
+        filename = src_link.split("/")[-1].replace(".js", "") + ".js"
+
+        with open(filename, 'w') as f:
+            f.write(js_content)
 
 for url in urls:
     try:
@@ -40,7 +37,6 @@ for url in urls:
 
                 if script_content:
                     f2.write(script_content + '\n')
-
                 else:
                     tag = script_tag
                     html = str(tag)
