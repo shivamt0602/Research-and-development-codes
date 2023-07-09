@@ -47,7 +47,7 @@ def scrape_links(curr_url, src_link, directory):
     
     if curr_url in src_link:
         print('Yes, present')  # It works, further processing
-        response = requests.get(src_link, headers=headers)
+        response = requests.get(src_link, headers=headers,verify=False)
         js_content = response.text
         filename = src_link.split("/")[-1].replace(".js", "") + ".js"
         filepath = os.path.join(directory, 'javascript', filename)
@@ -61,7 +61,7 @@ def scrape_css(curr_url, href_link, directory):
 
     if curr_url in href_link:
         print('Yes, present')  # It works, further processing
-        response = requests.get(href_link, headers=headers)
+        response = requests.get(href_link, headers=headers,verify=False)
         css_content = response.text
         filename = href_link.split("/")[-1].replace(".css", "") + ".css"
         filepath = os.path.join(directory, 'CSS', filename)
@@ -69,7 +69,7 @@ def scrape_css(curr_url, href_link, directory):
             f.write(css_content)
 
 def scrape_images(curr_url, img_src, directory):
-    response = requests.get(img_src, headers=headers)
+    response = requests.get(img_src, headers=headers,verify=False)
     if response.status_code == 200:
         img_content = response.content
         filename = img_src.split("/")[-1]
@@ -80,10 +80,10 @@ def scrape_images(curr_url, img_src, directory):
 
 
 
-def begin_process(urls):
-    for landing_page_url in urls:
+def begin_process(landing_page_url):
+    # for landing_page_url in urls:
         try:
-            r = requests.get(landing_page_url, headers=headers)
+            r = requests.get(landing_page_url, headers=headers,verify=False)
             r.raise_for_status()
             html_content = r.content
             soup = BeautifulSoup(html_content, 'html.parser')
@@ -141,9 +141,15 @@ def begin_process(urls):
                     scrape_images(landing_page_url, img_src, parent_directory)
 
         except requests.RequestException as e:
-            print(f"Failed to fetch content for {landing_page_url}: {e}")
+            with open("logs1.csv",'a') as ers:
+                ers.write(f"Failed to fetch content for {landing_page_url}: {e}\n")
+
+            # print(f"Failed to fetch content for {landing_page_url}: {e}")
+
         except Exception as e:
-            print(f"An error occurred while processing {landing_page_url}: {e}")
+             with open("logs2.csv",'a') as ers1:
+                ers1.write(f"An error occurred while processing {landing_page_url}: {e}\n")
+            # print(f"An error occurred while processing {landing_page_url}: {e}")
 
 if __name__ == "__main__":
 
@@ -169,7 +175,7 @@ if __name__ == "__main__":
         rows = table.find_all("tr")
 
         # List of the phishing URLs
-        phishingURLs = []
+        # phishingURLs = []
 
         # Loop row each row in the table
         for row in rows[1:]:
@@ -194,9 +200,8 @@ if __name__ == "__main__":
                     phishyURL = requiredElement.text.strip()
                     print(f"Phishy URL: {phishyURL}")
                     # Append the phishy URL to the list
-                    phishingURLs.append(phishyURL)
-
-        begin_process(phishingURLs)
+                    # phishingURLs.append(phishyURL)
+                    begin_process(phishyURL)
 
         # Go back to the previous page
         browser.back()
